@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Proxmox Dashboard</title>
+</head>
+
+<body>
+    <h1>Node Status</h1>
+
+    <form action="/stats" method="POST">
+        <button type="submit">
+            Fetch Stats
+        </button>
+    </form>
+
+    <h1>Create VM</h1>
+    <p>Creates a 2-core / 2GB RAM / 32GB disk VM using the next free VMID, with an ISO attached as install media.</p>
+
+    <% if (node) { %>
+        <p>Node: <strong><%= node %></strong></p>
+    <% } %>
+
+    <form action="/create-vm" method="POST">
+        <label for="iso">ISO to install from:</label><br>
+        <select name="iso" id="iso">
+            <% if (isos && isos.length) { %>
+                <% isos.forEach(function(iso) { %>
+                    <option value="<%= iso.volid %>"><%= iso.name %></option>
+                <% }); %>
+            <% } else { %>
+                <option value="">No ISOs found on configured storage</option>
+            <% } %>
+        </select>
+        <br><br>
+        <button type="submit">
+            Create VM
+        </button>
+    </form>
+
+    <h1>Delete VM</h1>
+    <p>Stops the VM first if it's running, then deletes it.</p>
+
+    <form action="/delete-vm" method="POST" onsubmit="return confirm('Delete this VM? This cannot be undone.');">
+        <label for="vmid">VM to delete:</label><br>
+        <select name="vmid" id="vmid">
+            <% if (vms && vms.length) { %>
+                <% vms.forEach(function(v) { %>
+                    <option value="<%= v.vmid %>"><%= v.vmid %> - <%= v.name %> (<%= v.status %>)</option>
+                <% }); %>
+            <% } else { %>
+                <option value="">No VMs found</option>
+            <% } %>
+        </select>
+        <br><br>
+        <button type="submit">
+            Delete VM
+        </button>
+    </form>
+
+    <% if (error) { %>
+        <h3>Error</h3>
+        <pre><%= error %></pre>
+    <% } %>
+
+    <% if (stats) { %>
+        <h3>Auth Response</h3>
+        <pre><%= JSON.stringify(stats, null, 2) %></pre>
+    <% } %>
+
+    <% if (vm) { %>
+        <h3>VM Created</h3>
+        <pre><%= JSON.stringify(vm, null, 2) %></pre>
+    <% } %>
+
+    <% if (deleted) { %>
+        <h3>VM Deleted</h3>
+        <pre><%= JSON.stringify(deleted, null, 2) %></pre>
+    <% } %>
+</body>
+</html>
